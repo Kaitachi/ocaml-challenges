@@ -45,7 +45,53 @@ let part_01 =
 
 ;;
 
+let part_02 =
+       read_whole_file "../../assets/AdventOfCode2024/Day03.in"
+    |> (fun text -> (* Let's find all operations first... *)
+            let index = ref 0 in
+            let matches = ref [] in
+            let re = Str.regexp {|mul([0-9]+,[0-9]+)\|do()\|don't()|} in
+            while (!index >= 0) do
+                let i =
+                    try
+                        Str.search_forward re text !index
+                    with Not_found -> -1 in
+                if i >= 0 then begin
+                    matches := !matches @ [Str.matched_group 0 text];
+                    index := Str.match_end ();
+                end else
+                    index := i
+            done;
+            print_endline "done";
+            !matches
+    )
+    |> (fun lst ->
+            let valid = ref [] in
+            let should_do = ref true in
 
-let () = part_01
+               lst
+            |> List.iter (fun item ->
+                    Printf.printf "> %s;\t should_do? %b\n" item !should_do;
+                    match item with
+                    | "do()" -> should_do := true
+                    | "don't()" -> should_do := false
+                    | instruction -> if !should_do then valid := !valid @ [instruction]
+            );
+            !valid
+    )
+    |> List.map (fun op ->
+            let re = Str.regexp {|\([0-9]+\),\([0-9]+\)|} in
+    
+            let _ = Str.search_forward re op 0 in
+            let x = int_of_string (Str.matched_group 1 op) in
+            let y = int_of_string (Str.matched_group 2 op) in
+            x * y
+    )
+    |> List.fold_left (+) 0
+
+;;
+
+
+let () = part_02
     |> Printf.printf "%d\n"
 
